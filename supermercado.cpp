@@ -2,12 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <locale.h>
-// N˙mero m·ximo de produtos cadastrados
+// N√∫mero m√°ximo de produtos cadastrados
 #define MAX_PRODUTOS 50  
-// N˙mero m·ximo de produtos no carrinho
+// N√∫mero m√°ximo de produtos no carrinho
 #define MAX_CARRINHO 50  
 
-// Estrutura para armazenar informaÁıes de um produto
+// Estrutura para armazenar informa√ß√µes de um produto
 typedef struct {
     int codigo;
     char nome[30];
@@ -27,7 +27,7 @@ Carrinho carrinho[MAX_CARRINHO];
 int totalProdutos = 0; 
 int totalCarrinho = 0;  
 
-// DeclaraÁ„o das funÁıes
+// Declara√ß√£o das fun√ß√µes
 void menu();
 void cadastrarProduto();
 void listarProdutos();
@@ -41,99 +41,218 @@ void infoProduto(Produto prod);
 void limparTela();
 int validarEntradaInt();
 float validarEntradaFloat();
-
+void editarProduto();
+void excluirProduto();
 int main() {
-	 // Define o idioma e o encoding para PortuguÍs UTF-8, para n„o quebrar em car·cteres especiais
+	 // Define o idioma e o encoding para Portugu√™s UTF-8, para n√£o quebrar em car√°cteres especiais
     setlocale(LC_ALL, "");
     menu();  
     return 0;
 }
 
 
-// FunÁ„o para limpar a tela
+// Fun√ß√£o para limpar a tela
 void limparTela() {
      system("cls");
 }
 
-// FunÁ„o que exibe o menu de opÁıes e processa a entrada do usu·rio
+// Fun√ß√£o que exibe o menu de op√ß√µes e processa a entrada do usu√°rio
 void menu() {
     int opcao;
     do {
         printf("\n--- Sistema de Supermercado ---\n");
         printf("1. Cadastrar Produto\n");
         printf("2. Listar Produtos\n");
-        printf("3. Comprar Produto\n");
-        printf("4. Visualizar Carrinho\n");
-        printf("5. Remover Item do Carrinho\n");
-        printf("6. Fechar Pedido\n");
-        printf("7. Sair\n");
-        printf("Escolha uma opcao: ");
+        printf("3. Editar Produto\n");  // Nova op√É¬ß√É¬£o
+        printf("4. Excluir Produto\n"); // Nova op√É¬ß√É¬£o
+        printf("5. Comprar Produto\n");
+        printf("6. Visualizar Carrinho\n");
+        printf("7. Remover Item do Carrinho\n");
+        printf("8. Fechar Pedido\n");
+        printf("9. Sair\n");
+        printf("Escolha uma op√ß√£o: ");
         opcao = validarEntradaInt();
 
         switch (opcao) {
-            case 1: cadastrarProduto(); break;
-            case 2: listarProdutos(); break;
-            case 3: comprarProduto(); break;
-            case 4: visualizarCarrinho(); break;
-            case 5: removerDoCarrinho(); break;
-            case 6: fecharPedido(); break;
-            case 7: printf("Saindo do sistema...\n"); break;
-            default: printf("Opcao invalida! Tente novamente.\n");
+            case 1:
+				cadastrarProduto();
+			break;
+            case 2:
+				listarProdutos();
+			break;
+            case 3:
+				editarProduto();
+			break;
+            case 4: 
+				excluirProduto(); 
+			break;
+            case 5:
+				comprarProduto();
+			break;
+            case 6:
+				visualizarCarrinho();
+			break;
+            case 7:
+				removerDoCarrinho();
+			break;
+            case 8: 
+				fecharPedido();
+			break;
+            case 9:
+				printf("Saindo do sistema...\n");
+			break;
+            default: 
+				printf("Op√ß√£o inv√°lida! Tente novamente.\n");
         }
-    } while (opcao != 7);
+    } while (opcao != 9);
 }
 
-// FunÁ„o para validar entrada de n˙mero inteiro
+// Fun√ß√£o para editar o nome e o pre√ßo de um produto
+void editarProduto() {
+    limparTela();
+    listarProdutos();
+
+    if (totalProdutos == 0) {
+        printf("Nenhum produto cadastrado para editar.\n");
+        return;
+    }
+
+    printf("Digite o c√≥digo do produto que deseja editar: ");
+    int codigo = validarEntradaInt();
+
+    Produto *p = pegarProdutoPorCodigo(codigo);
+    if (!p) {
+        printf("Produto n√£o encontrado!\n");
+        return;
+    }
+
+    // Exibe as informa√ß√µes atuais do produto
+    printf("Produto encontrado:\n");
+    printf("Nome atual: %s\n", p->nome);
+    printf("Pre√ßo atual: R$%.2f\n", p->preco);
+
+    // Pergunta se o usu√°rio deseja editar o nome
+    char editarNome;
+    printf("Deseja editar o nome? (s/n): ");
+    scanf(" %c", &editarNome); 
+
+    if (editarNome == 's' || editarNome == 'S') {
+        printf("Digite o novo nome: ");
+        scanf("%s", p->nome);
+    }
+
+    // Pergunta se o usu√°rio deseja editar o pre√ßo
+    char editarPreco;
+    printf("Deseja editar o pre√ßo? (s/n): ");
+    scanf(" %c", &editarPreco);
+
+    if (editarPreco == 's' || editarPreco == 'S') {
+        printf("Digite o novo pre√ßo: ");
+        p->preco = validarEntradaFloat();
+    }
+
+    printf("Produto atualizado com sucesso!\n");
+}
+
+// Fun√ß√£o para excluir um produto (do estoque e do carrinho)
+void excluirProduto() {
+    limparTela();
+    listarProdutos();
+
+    if (totalProdutos == 0) {
+        printf("Nenhum produto cadastrado para excluir.\n");
+        return;
+    }
+
+    printf("Digite o c√≥digo do produto que deseja excluir: ");
+    int codigo = validarEntradaInt();
+
+    int indice = -1;
+    for (int i = 0; i < totalProdutos; i++) {
+        if (produtos[i].codigo == codigo) {
+            indice = i;
+            break;
+        }
+    }
+
+    if (indice == -1) {
+        printf("Produto n√£o encontrado!\n");
+        return;
+    }
+
+    // Remove o produto do estoque
+    for (int i = indice; i < totalProdutos - 1; i++) {
+        produtos[i] = produtos[i + 1];
+    }
+    totalProdutos--;
+
+    // Remove o produto do carrinho
+    for (int i = 0; i < totalCarrinho; i++) {
+        if (carrinho[i].produto.codigo == codigo) {
+            // Remove o produto do carrinho e reorganiza o array
+            for (int j = i; j < totalCarrinho - 1; j++) {
+                carrinho[j] = carrinho[j + 1];
+            }
+            totalCarrinho--;
+            printf("Produto removido do carrinho tamb√©m!\n");
+            break;
+        }
+    }
+
+    printf("Produto exclu√≠do com sucesso!\n");
+}
+
+// Fun√ß√£o para validar entrada de n√É¬∫mero inteiro
 int validarEntradaInt() {
     int valor;
     while (scanf("%d", &valor) != 1) {
-        printf("Entrada inv·lida! Digite um n˙mero v·lido: ");
-        while (getchar() != '\n');  // Limpar buffer do teclado
+        printf("Entrada inv√°lida! Digite um n√∫mero v√°lido: ");
+        while (getchar() != '\n'); 
     }
     return valor;
 }
 
-// FunÁ„o para validar entrada de n˙mero float
+// Fun√ß√£o para validar entrada de n√É¬∫mero float
 float validarEntradaFloat() {
     float valor;
     while (scanf("%f", &valor) != 1) {
-        printf("Entrada inv·lida! Digite um valor numÈrico: ");
+        printf("Entrada inv√°lida! Digite um valor num√©rico: ");
         while (getchar() != '\n');  // Limpar buffer do teclado
     }
     return valor;
 }
 
-// FunÁ„o para cadastrar um novo produto no sistema
+// Fun√ß√£o para cadastrar um novo produto no sistema
 void cadastrarProduto() {
     limparTela();
-    if (totalProdutos >= MAX_PRODUTOS) {  
+    if (totalProdutos >= MAX_PRODUTOS) {
         printf("Limite de produtos atingido!\n");
         return;
     }
 
     Produto p;
      printf("Cadastre um novo Produto\n");
-    // ValidaÁ„o para n„o permitir cÛdigos duplicados
+    // Valida√ß√£o para n√£o permitir c√≥digos duplicados
     do {
         printf("Codigo: ");
         p.codigo = validarEntradaInt();
-        
+
         if (pegarProdutoPorCodigo(p.codigo) != NULL) {
-            printf("Erro: J· existe um produto com esse cÛdigo! Tente novamente.\n");
+            printf("Erro: j√° existe um produto com esse c√É¬≥digo! Tente novamente.\n");
         }
     } while (pegarProdutoPorCodigo(p.codigo) != NULL);
-    
+
     printf("Nome: ");
     scanf("%s", p.nome);
-    
+
     printf("Preco: ");
     p.preco = validarEntradaFloat();
-    
-    produtos[totalProdutos++] = p;  
+
+    produtos[totalProdutos++] = p; 
     limparTela();
     printf("Produto cadastrado com sucesso!\n");
 }
-// FunÁ„o para listar todos os produtos cadastrados
+// Fun√ß√£o para listar todos os produtos cadastrados
 void listarProdutos() {
     limparTela();
 
@@ -142,18 +261,18 @@ void listarProdutos() {
         return;
     }
 
-    printf("\n--- Produtos DisponÌveis ---\n");
+    printf("\n--- Produtos Dispon√≠veis ---\n");
     for (int i = 0; i < totalProdutos; i++) {
         infoProduto(produtos[i]);
     }
 }
 
-// FunÁ„o para adicionar um produto ao carrinho de compras
+// Fun√ß√£o para adicionar um produto ao carrinho de compras
 void comprarProduto() {
     limparTela();
     listarProdutos();
 
-    printf("Digite o cÛdigo do produto que deseja comprar: ");
+    printf("Digite o c√≥digo do produto que deseja comprar: ");
     int codigo = validarEntradaInt();
 
     Produto *p = pegarProdutoPorCodigo(codigo);
@@ -178,7 +297,7 @@ void comprarProduto() {
     printf("Produto adicionado ao carrinho!\n");
 }
 
-// FunÁ„o para visualizar os itens no carrinho
+// Fun√ß√£o para visualizar os itens no carrinho
 void visualizarCarrinho() {
     limparTela();
 
@@ -196,7 +315,7 @@ void visualizarCarrinho() {
     }
 }
 
-// FunÁ„o para remover um item do carrinho
+// Fun√ß√£o para remover um item do carrinho
 void removerDoCarrinho() {
     limparTela();
     listarProdutos();
@@ -205,7 +324,7 @@ void removerDoCarrinho() {
         return;
     }
 
-    printf("Digite o cÛdigo do produto a remover: ");
+    printf("Digite o c√≥digo do produto a remover: ");
     int codigo = validarEntradaInt();
 
     int indice = temNoCarrinho(codigo);
@@ -226,7 +345,7 @@ void removerDoCarrinho() {
     printf("Produto removido do carrinho!\n");
 }
 
-// FunÁ„o para finalizar a compra e exibir o total
+// Fun√ß√£o para finalizar a compra e exibir o total
 void fecharPedido() {
     limparTela();
 
@@ -250,7 +369,7 @@ void fecharPedido() {
     printf("Pedido finalizado!\n");
 }
 
-// FunÁıes auxiliares
+// Fun√ß√µes auxiliares
 int temNoCarrinho(int codigo) {
     for (int i = 0; i < totalCarrinho; i++) {
         if (carrinho[i].produto.codigo == codigo) {
@@ -272,4 +391,3 @@ Produto *pegarProdutoPorCodigo(int codigo) {
 void infoProduto(Produto prod) {
     printf("Codigo: %d, Nome: %s, Preco: R$%.2f\n", prod.codigo, prod.nome, prod.preco);
 }
-

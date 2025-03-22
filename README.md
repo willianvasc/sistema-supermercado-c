@@ -13,7 +13,8 @@ Este é um projeto simples de **sistema de compras em um supermercado**, desenvo
 ✅ **Fechar Pedido** (exibe fatura e esvazia o carrinho)  
 ✅ **Validações de entrada** para garantir que o usuário digite valores corretos  
 ✅ **Limpeza de tela** ao mudar de menu  
-
+✅ **Editar Produtos** para que seja possível a edição dos nomes e valores de produtos cadastrados
+✅ **Excluir produtos** para possibilitar a exclusão de produtos do carrinho e do estoque
 ---
 
 ## 🚀 Como executar  
